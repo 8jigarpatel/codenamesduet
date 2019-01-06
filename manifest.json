@@ -1,0 +1,15 @@
+{
+    "name": "Codenames Duet",
+    "short_name": "Duet",
+    "icons": [
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#309900",
+    "theme_color": "#309900"
+}
