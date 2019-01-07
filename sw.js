@@ -2,9 +2,9 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open('main').then(function(cache) {
             return cache.addAll([
-                '/index.html',
-                '/styles.css',
-                '/main.js'
+                'index.html',
+                'styles.css',
+                'main.js'
             ]);
         })
     );
