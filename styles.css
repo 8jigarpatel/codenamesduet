@@ -1,16 +1,21 @@
 html {
     font-size: 2.5vw;
-    font-size: min(2.5vw, 3vh, 20px);
     background: radial-gradient(#79b855 25%, #008e3d 90%);
     min-height: 100%;
 }
 body {
-    margin: 15px auto;
+    margin: 1rem 0;
     font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
-    width: 38rem;
 }
 
+.header {
+    width: 37rem;
+    margin: auto;
+}
 .cardouter {
+    box-sizing: border-box;
+    width: 38rem;
+    margin: auto;
     background-color: #8f796b;
     padding: 1.8rem;
     border-radius: 2rem;
@@ -163,9 +168,8 @@ h4 {
 }
 .buttons {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 0 1rem;
 }
 .buttons>* {
     width: 30%;
@@ -181,6 +185,7 @@ h4 {
     text-align: center;
     box-shadow: 0 1px 1px rgba(0,0,0,0.15);
     border: 2px solid transparent;
+    margin-bottom: 20px;
 }
 .button:disabled {
     visibility: hidden;
@@ -258,4 +263,35 @@ input {
 input::-webkit-inner-spin-button, 
 input::-webkit-outer-spin-button { 
     -webkit-appearance: none;
+}
+
+@media (min-width:800px) {
+    html {
+        font-size: 20px;
+    }
+}
+@media (max-height:479px) {
+    html {
+        font-size: 3.035vh;
+    }
+    body {
+        display: flex;
+    }
+    .header {
+        width: calc(100vw - 41.5rem);
+    }
+    h4 {
+        margin-bottom: 28px;
+    }
+    .buttons>* {
+        width: 100%;
+    }
+    .game button.alternate {
+        top: -60px;
+        left: 0;
+    }
+    .game button.default {
+        top: 60px;
+        right: 0;
+    }
 }
