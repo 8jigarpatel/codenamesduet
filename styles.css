@@ -270,7 +270,7 @@ input::-webkit-outer-spin-button {
         font-size: 20px;
     }
 }
-@media (max-height:479px) {
+@media (max-height:449px) {
     html {
         font-size: 3.035vh;
     }
