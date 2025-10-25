@@ -5,7 +5,6 @@
     const flips = document.querySelectorAll('.flip');
     const game = document.getElementById('game');
     const boxes = document.querySelectorAll('.box');
-    const debugFlag = true;
 
     // --- UI bindings ---
     for (const flip of flips) {
@@ -38,22 +37,38 @@
     setFlip(localStorage.getItem('flip') || 0);
 
     // --- Core functions ---
-
     function setGame(value) {
         seed = parseInt(value);
-        rng = mulberry32(seed); // deterministic PRNG
+        rng = mulberry32(seed);
 
-        // Base shuffled indices
+        // Step 1: select shared cards
         const allIndices = [...Array(25).keys()];
         const shuffled = shuffle(allIndices);
 
-        // Step 1: pick overlapping cards
-        const sharedGreens = shuffled.slice(0, 3);   // 3 shared green agents
-        const sharedAssassin = shuffled[3];          // 1 shared assassin
+        const sharedGreens = shuffled.slice(0, 3);            // 3 overlapping green cards
+        const sharedAssassin = shuffled.find(i => !sharedGreens.includes(i)); // 1 overlapping assassin
 
-        // Step 2: generate both sides
-        const sideA = generateSide(sharedGreens, sharedAssassin);
-        const sideB = generateSide(sharedGreens, sharedAssassin);
+        // Step 2: remaining indices (exclude shared)
+        let remaining = allIndices.filter(i => !sharedGreens.includes(i) && i !== sharedAssassin);
+        remaining = shuffle(remaining);
+
+        // Step 3: assign 6 unique greens per side
+        const sideA_uniqueGreens = remaining.slice(0, 6);
+        const sideB_uniqueGreens = remaining.slice(6, 12);
+
+        // Step 4: assign 2 unique assassins per side
+        const sideA_uniqueAssassins = remaining.slice(12, 14);
+        const sideB_uniqueAssassins = remaining.slice(14, 16);
+
+        // Step 5: combine shared + unique for each side
+        const sideA = {
+            green: [...sharedGreens, ...sideA_uniqueGreens],
+            black: [sharedAssassin, ...sideA_uniqueAssassins]
+        };
+        const sideB = {
+            green: [...sharedGreens, ...sideB_uniqueGreens],
+            black: [sharedAssassin, ...sideB_uniqueAssassins]
+        };
 
         sides[0] = sideA;
         sides[1] = sideB;
@@ -62,28 +77,11 @@
         game.value = value;
     }
 
-    function generateSide(sharedGreens, sharedAssassin) {
-        const indices = shuffle([...Array(25).keys()]);
-        const greens = new Set(sharedGreens);
-        const blacks = new Set([sharedAssassin]);
-
-        // Add 6 unique greens (9 total)
-        for (let i = 0; greens.size < 9; i++) {
-            const idx = indices[i];
-            if (!greens.has(idx) && !blacks.has(idx)) greens.add(idx);
-        }
-
-        // Add 2 more assassins unique to this side (3 total)
-        for (let i = 0; blacks.size < 3; i++) {
-            const idx = indices[greens.size + i];
-            if (!greens.has(idx)) blacks.add(idx);
-        }
-
-        return { green: [...greens], black: [...blacks] };
-    }
-
     function setFlip(value) {
+        // reset all boxes
         boxes.forEach(b => (b.className = 'box'));
+
+        // update flip buttons
         flips.forEach(f => {
             f.classList.remove('active');
             f.disabled = false;
@@ -94,41 +92,18 @@
             flips[value ^ 1].disabled = true;
 
             const side = sides[value];
-            const debug = debugFlag;
 
             // apply greens
-            side.green.forEach(i => {
-                boxes[i].classList.add('green');
-
-                // DEBUG: highlight shared green cards in orange
-                if (debug) {
-                    const otherSide = sides[value ^ 1];
-                    if (otherSide.green.includes(i)) {
-                        boxes[i].classList.add('debug-shared');
-                    }
-                }
-            });
+            side.green.forEach(i => boxes[i].classList.add('green'));
 
             // apply blacks
             side.black.forEach(i => boxes[i].classList.add('black'));
-
-            // DEBUG: highlight shared assassin in red border
-            if (debug) {
-                const otherSide = sides[value ^ 1];
-                side.black.forEach(i => {
-                    if (otherSide.black.includes(i)) {
-                        boxes[i].classList.add('debug-shared-assassin');
-                    }
-                });
-            }
         }
 
         localStorage.setItem('flip', value);
     }
 
-
     // --- Helper functions ---
-
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(rng() * (i + 1));
@@ -137,7 +112,6 @@
         return array;
     }
 
-    // Deterministic RNG (Mulberry32)
     function mulberry32(a) {
         return function () {
             var t = a += 0x6D2B79F5;
